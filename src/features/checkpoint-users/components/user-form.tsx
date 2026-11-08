@@ -36,7 +36,6 @@ function UserFormInner({ id, initial }: { id?: string; initial: CheckpointUserVa
             <TextField name="email" label="Email" required type="email" disabled={!!id} hint={id ? "Email can’t be changed after the account is created." : undefined} />
             {id && <div className="flex items-end pb-2"><SwitchField name="isActive" label="Active" className="w-full" /></div>}
           </div>
-          {save.isError && !save.error?.fieldErrors && <p role="alert" className="mt-4 text-sm text-bad">{save.error.message}</p>}
           <div className="mt-6 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => router.push("/checkpoint-users")} disabled={save.isPending}>Cancel</Button>
             <Button type="submit" loading={save.isPending}>Save</Button>

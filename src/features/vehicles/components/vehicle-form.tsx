@@ -69,7 +69,6 @@ function Inner({ id, initial, labels }: { id?: string; initial: VehicleValues; l
             </div>
           </Section>
         )}
-        {save.isError && !save.error.fieldErrors && <p role="alert" className="text-sm text-bad">{save.error.message}</p>}
         <div className="flex justify-end gap-2">
           <Button variant="secondary" onClick={() => router.push(id ? `/vehicles/${id}` : "/vehicles")} disabled={save.isPending}>Cancel</Button>
           <Button type="submit" loading={save.isPending}>Save</Button>

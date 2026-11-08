@@ -37,7 +37,6 @@ export function CheckInForm({ id }: { id: string }) {
           <div className="space-y-5">
             <Section title="Weigh in">
               <TextField name="grossWeight" label="Gross weight (kg)" required type="number" inputMode="decimal" placeholder="0" className="max-w-xs" />
-              {checkIn.isError && !checkIn.error.fieldErrors && <p role="alert" className="mt-3 text-sm text-bad">{checkIn.error.message}</p>}
               <div className="mt-5 flex gap-2">
                 <Button type="submit" loading={checkIn.isPending}>Save check-in</Button>
                 <Button variant="secondary" onClick={() => router.push(`/queue/${id}`)} disabled={checkIn.isPending}>Cancel</Button>

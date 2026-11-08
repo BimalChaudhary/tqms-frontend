@@ -201,11 +201,6 @@ export function OtherVehicleForm() {
               lookup="vehicle-types"
             />
           </div>
-          {m.isError && !m.error.fieldErrors && (
-            <p role="alert" className="mt-4 text-sm text-bad">
-              {m.error.message}
-            </p>
-          )}
           <div className="mt-6 flex justify-end gap-2">
             <Button
               variant="secondary"

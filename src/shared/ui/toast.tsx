@@ -1,7 +1,8 @@
 "use client";
 import { CheckCircle2, Info, XCircle } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { cn } from "@/shared/lib/cn";
+import { API_ERROR_TOAST_EVENT } from "@/shared/api/client";
 
 type Tone = "success" | "error" | "info";
 interface ToastItem { id: number; tone: Tone; message: string }
@@ -14,9 +15,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const push = useCallback((tone: Tone, message: string) => {
     const id = ++seq;
-    setItems((s) => [...s, { id, tone, message }]);
+    setItems((s) => s.some((item) => item.tone === tone && item.message === message)
+      ? s
+      : [...s, { id, tone, message }]);
     setTimeout(() => setItems((s) => s.filter((t) => t.id !== id)), tone === "error" ? 6000 : 3500);
   }, []);
+  useEffect(() => {
+    const onApiError = (event: Event) => {
+      const message = (event as CustomEvent<{ message?: string }>).detail?.message;
+      if (message) push("error", message);
+    };
+    window.addEventListener(API_ERROR_TOAST_EVENT, onApiError);
+    return () => window.removeEventListener(API_ERROR_TOAST_EVENT, onApiError);
+  }, [push]);
   const api = useMemo<Api>(() => ({ success: (m) => push("success", m), error: (m) => push("error", m), info: (m) => push("info", m) }), [push]);
   const Icon = { success: CheckCircle2, error: XCircle, info: Info };
 

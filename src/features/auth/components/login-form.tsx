@@ -8,7 +8,6 @@ import { applyServerErrors } from "@/shared/forms/server-errors";
 import { TextField } from "@/shared/forms/fields";
 import { FieldShell } from "@/shared/forms/field-shell";
 import { Button } from "@/shared/ui/button";
-import { errorMessage } from "@/shared/api/client";
 import { useLogin } from "../hooks";
 import { loginSchema } from "../schemas";
 import type { LoginInput } from "../types";
@@ -16,20 +15,17 @@ import type { LoginInput } from "../types";
 export function LoginForm() {
   const login = useLogin();
   const [show, setShow] = useState(false);
-  const [formError, setFormError] = useState<string>();
   const methods = useForm<LoginInput>({ resolver: zodResolver(loginSchema), defaultValues: { email: "", password: "", remember: true } });
   const { register, handleSubmit, setError, formState: { errors } } = methods;
 
   const submit = handleSubmit(async (v) => {
-    setFormError(undefined);
     try { await login.mutateAsync(v); }
-    catch (e) { if (!applyServerErrors(e, setError)) setFormError(errorMessage(e)); }
+    catch (e) { applyServerErrors(e, setError); }
   });
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={submit} noValidate className="space-y-4">
-        {formError && <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-bad">{formError}</p>}
         <TextField name="email" label="Username" type="email" placeholder="you@example.com" required />
         <FieldShell label="Password" required error={errors.password?.message}>
           {(p) => (

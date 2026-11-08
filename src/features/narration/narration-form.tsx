@@ -39,7 +39,6 @@ function Inner({ initial }: { initial: Values }) {
         <form noValidate className="max-w-xl space-y-4"
           onSubmit={methods.handleSubmit(async (v) => { try { await m.mutateAsync(v); methods.reset(v); } catch (e) { applyServerErrors(e, methods.setError); } })}>
           <TextareaField name="narration" label="Receipt narration" required hint="Printed on every receipt issued from this checkpoint." />
-          {m.isError && !m.error.fieldErrors && <p role="alert" className="text-sm text-bad">{m.error.message}</p>}
           <div className="flex gap-2">
             <Button type="submit" loading={m.isPending} disabled={!methods.formState.isDirty}>Save</Button>
             <Button variant="secondary" onClick={() => methods.reset()} disabled={!methods.formState.isDirty}>Reset</Button>

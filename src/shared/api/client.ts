@@ -25,6 +25,14 @@ export class ApiError extends Error {
   }
 }
 
+export const API_ERROR_TOAST_EVENT = "tqms:api-error-toast";
+
+function notifyApiError(message: string) {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(API_ERROR_TOAST_EVENT, { detail: { message } }));
+  }
+}
+
 type Query = Record<string, string | number | boolean | undefined | null>;
 interface RequestOptions {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
@@ -66,11 +74,15 @@ export async function apiFetch<T>(path: string, opts: RequestOptions = {}): Prom
       const response = error.response;
       const payload = (response?.data ?? {}) as Partial<ApiErrorBody>;
       if (!response) {
-        throw new ApiError(0, "Can't reach the server. Check your connection and try again.");
+        const message = "Can't reach the server. Check your connection and try again.";
+        notifyApiError(message);
+        throw new ApiError(0, message);
       }
+      const message = payload.message ?? `Request failed (${response.status})`;
+      notifyApiError(message);
       throw new ApiError(
         response.status,
-        payload.message ?? `Request failed (${response.status})`,
+        message,
         payload.errors,
       );
     }

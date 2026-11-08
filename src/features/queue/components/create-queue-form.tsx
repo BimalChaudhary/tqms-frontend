@@ -73,7 +73,6 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
             <TextareaField name="narration" label="Narration" className="sm:col-span-2" />
             <PhoneField name="driverPhone" label="Driver’s phone" />
           </div>
-          {create.isError && !create.error.fieldErrors && <p role="alert" className="mt-4 text-sm text-bad">{create.error.message}</p>}
           <div className="mt-6 flex justify-end gap-2">
             <Button variant="secondary" onClick={() => router.push("/queue")} disabled={create.isPending}>Cancel</Button>
             <Button type="submit" loading={create.isPending}>Save</Button>

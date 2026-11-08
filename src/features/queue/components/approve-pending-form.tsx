@@ -59,7 +59,6 @@ export function ApprovePendingForm({ id }: { id: string }) {
               <PhoneField name="driverPhone" label="Driver’s phone" />
               <TextareaField name="remarks" label="Remarks" className="sm:col-span-2 lg:col-span-3" />
             </div>
-            {approve.isError && !approve.error.fieldErrors && <p role="alert" className="mt-4 text-sm text-bad">{approve.error.message}</p>}
             <div className="mt-6 flex justify-end gap-2">
               <Button variant="secondary" onClick={() => router.push("/queue")} disabled={approve.isPending}>Cancel</Button>
               <Button type="submit" loading={approve.isPending}>Approve queue</Button>

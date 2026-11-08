@@ -192,11 +192,6 @@ function Inner({
             />
           </div>
         </Section>
-        {save.isError && !save.error.fieldErrors && (
-          <p role="alert" className="text-sm text-bad">
-            {save.error.message}
-          </p>
-        )}
         <div className="flex justify-end gap-2">
           <Button
             variant="secondary"
