@@ -18,15 +18,15 @@ export function ReceiptPreview({ data, draft, cutFee = 50, onCutFeeChange }: {
         {draft && <p className="mt-1 text-[11px] text-warn">Preview — receipt number is assigned when you save</p>}
       </header>
       <dl className="py-2">
-        {row("Receipt no.", data.receiptNo ?? "—")}
-        {row("Date", orDash(data.date))}
-        {row("Time", orDash(data.time))}
-        {row("Checkpoint", orDash(data.checkpoint))}
-        {row("Vehicle no.", orDash(data.vehicleNumber))}
-        {row("Load", orDash(data.load))}
-        {row("Narration", orDash(data.narration))}
-        {row("Driver’s phone", orDash(data.driverPhone))}
-        {row("Weight", formatKg(data.weight))}
+        {row("रसिद नं:", data.receiptNo ?? "—")}
+        {row("मिति:", orDash(data.date))}
+        {row("समय:", orDash(data.time))}
+        {row("तौलस्थान:", orDash(data.checkpoint))}
+        {row("सवारी नं:", orDash(data.vehicleNumber))}
+        {row("सामान:", orDash(data.load))}
+        {row("विवरण:", orDash(data.narration))}
+        {row("चालकको फोन नं:", orDash(data.driverPhone))}
+        {row("तौल:", formatKg(data.weight))}
       </dl>
       <table className="w-full border-t border-line">
         <thead><tr className="text-left text-muted"><th className="py-1.5 font-medium">विवरण</th><th className="py-1.5 text-right font-medium">रकम (रु.)</th></tr></thead>
