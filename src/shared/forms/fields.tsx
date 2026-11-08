@@ -39,6 +39,13 @@ export function NepaliDateField({ name, label, required, hint, className, disabl
   const { control } = useFormContext<FieldValues>();
   const { field } = useController({ name, control });
   const error = useErr(name);
+  const [open, setOpen] = useState(false);
+  const [view, setView] = useState(() => {
+    try {
+      const initial = iso ? new NepaliDate(new Date(`${iso}T06:00:00Z`)) : new NepaliDate();
+      return { year: initial.getYear(), month: initial.getMonth() };
+    } catch { const now = new NepaliDate(); return { year: now.getYear(), month: now.getMonth() }; }
+  });
   const iso = typeof field.value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(field.value) ? field.value : "";
   let bs = "";
   if (iso) {
@@ -48,23 +55,74 @@ export function NepaliDateField({ name, label, required, hint, className, disabl
       bs = `${converted.year}-${String(converted.month + 1).padStart(2, "0")}-${String(converted.date).padStart(2, "0")}`;
     } catch { /* An unsupported Gregorian date remains editable for correction. */ }
   }
+  const bsMonthNames = ["बैशाख", "जेठ", "असार", "साउन", "भदौ", "असोज", "कार्तिक", "मंसिर", "पुष", "माघ", "फागुन", "चैत"];
+  const toIso = (year: number, month: number, day: number) => {
+    try {
+      const converted = new NepaliDate(year, month, day);
+      const actual = converted.getBS();
+      if (actual.year !== year || actual.month !== month || actual.date !== day) return undefined;
+      const date = converted.toJsDate();
+      const ad = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      return /^\d{4}-\d{2}-\d{2}$/.test(ad) ? ad : undefined;
+    } catch { return undefined; }
+  };
+  const firstDay = new NepaliDate(view.year, view.month, 1).getDay();
+  let daysInMonth = 0;
+  for (let day = 1; day <= 32; day++) {
+    const normalized = new NepaliDate(view.year, view.month, day).getBS();
+    if (normalized.year !== view.year || normalized.month !== view.month) break;
+    daysInMonth = day;
+  }
+  const moveMonth = (delta: number) => {
+    const cursor = new NepaliDate(view.year, view.month, 1);
+    cursor.setMonth(view.month + delta);
+    const next = cursor.getBS();
+    setView({ year: next.year, month: next.month });
+  };
   return <FieldShell label={label} required={required} error={error} hint={hint ?? "Bikram Sambat (YYYY-MM-DD)"} className={className}>
-    {(p) => <input {...p} ref={field.ref} name={field.name} value={iso ? bs : String(field.value ?? "")} disabled={disabled}
-      placeholder="2083-01-01" inputMode="numeric" autoComplete="off" onBlur={field.onBlur}
-      onChange={(e) => {
+    {(p) => <div className="relative">
+      <div className="flex gap-2">
+        <input {...p} ref={field.ref} name={field.name} value={iso ? bs : String(field.value ?? "")} disabled={disabled}
+          placeholder="2083-01-01" inputMode="numeric" autoComplete="off" onBlur={field.onBlur}
+          onChange={(e) => {
         const raw = e.target.value.trim();
         if (!raw) { field.onChange(""); return; }
         if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) { field.onChange(raw); return; }
         try {
           const [y, m, d] = raw.split("-").map(Number);
-          const converted = new NepaliDate(y, m - 1, d);
-          const roundTrip = converted.getBS();
-          if (roundTrip.year !== y || roundTrip.month !== m - 1 || roundTrip.date !== d) { field.onChange(raw); return; }
-          const date = converted.toJsDate();
-          const ad = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-          field.onChange(ad);
+          field.onChange(toIso(y, m - 1, d) ?? raw);
         } catch { field.onChange(raw); }
-      }} className="control" />}
+      }} className="control min-w-0 flex-1" />
+        <button type="button" disabled={disabled} aria-label={`Choose ${label.toLowerCase()} in Nepali calendar`} aria-expanded={open}
+          onClick={() => { if (!open) { if (iso) { const selected = new NepaliDate(new Date(`${iso}T06:00:00Z`)); setView({ year: selected.getYear(), month: selected.getMonth() }); } setOpen(true); } else setOpen(false); }}
+          className="control flex w-11 shrink-0 items-center justify-center px-2" title="Open Nepali calendar">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 9h16"/></svg>
+        </button>
+      </div>
+      {open && <div role="dialog" aria-label="Nepali date picker" className="mt-2 w-72 max-w-full rounded-lg border border-line bg-white p-3 shadow-md">
+        <div className="mb-2 flex items-center justify-between">
+          <button type="button" onClick={() => moveMonth(-1)} aria-label="Previous Nepali month" className="rounded px-2 py-1 text-lg hover:bg-stone-100">‹</button>
+          <span className="font-medium">{bsMonthNames[view.month]} {view.year}</span>
+          <button type="button" onClick={() => moveMonth(1)} aria-label="Next Nepali month" className="rounded px-2 py-1 text-lg hover:bg-stone-100">›</button>
+        </div>
+        <div className="grid grid-cols-7 text-center text-xs text-muted">{["आ", "सो", "मं", "बु", "बि", "शु", "श"].map((day) => <span key={day} className="py-1">{day}</span>)}</div>
+        <div className="grid grid-cols-7 gap-1 text-center text-sm">
+          {Array.from({ length: firstDay }, (_, i) => <span key={`blank-${i}`} />)}
+          {Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const dateIso = toIso(view.year, view.month, day);
+            const selected = dateIso && dateIso === iso;
+            return <button key={day} type="button" disabled={!dateIso} aria-pressed={!!selected}
+              onClick={() => { if (dateIso) { field.onChange(dateIso); setOpen(false); } }}
+              className={`rounded py-1.5 hover:bg-brand-100 disabled:opacity-30 ${selected ? "bg-brand-700 text-white hover:bg-brand-700" : ""}`}>{day}</button>;
+          })}
+        </div>
+        <div className="mt-2 flex justify-between border-t border-line pt-2 text-xs">
+          <button type="button" className="text-brand-700 hover:underline" onClick={() => { field.onChange(""); setOpen(false); }}>मेट्नुहोस्</button>
+          <button type="button" className="text-brand-700 hover:underline" onClick={() => { const now = new NepaliDate(); const current = now.getBS(); const dateIso = toIso(current.year, current.month, current.date); if (dateIso) field.onChange(dateIso); setView({ year: current.year, month: current.month }); setOpen(false); }}>आज</button>
+        </div>
+      </div>}
+    </div>}
   </FieldShell>;
 }
 
