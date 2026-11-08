@@ -25,6 +25,7 @@ npm start
 ```
 
 There is no automated frontend test script configured at this time.
+For backend smoke checks and the manual browser checklist, see the [step-by-step testing guide](docs/TESTING_GUIDE.md).
 
 ## Feature structure
 
