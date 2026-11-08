@@ -23,6 +23,7 @@ export function ReceiptPreview({ data, draft }: { data: ReceiptView; draft?: boo
         {row("Vehicle no.", orDash(data.vehicleNumber))}
         {row("Load", orDash(data.load))}
         {row("Narration", orDash(data.narration))}
+        {row("Driver’s phone", orDash(data.driverPhone))}
         {row("Weight", formatKg(data.weight))}
       </dl>
       <table className="w-full border-t border-line">

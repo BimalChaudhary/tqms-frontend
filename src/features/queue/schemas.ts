@@ -14,6 +14,7 @@ export const createQueueSchema = (kind: VehicleKind) =>
     transportCompany: z.string().trim().optional(),
     loadDetails: z.string().trim().min(1, "Enter the load details"),
     narration: z.string().trim().max(200, "Keep it under 200 characters").optional(),
+    driverPhone: z.union([z.literal(""), nepaliMobile]).optional(),
   }).superRefine((v, ctx) => {
     if (kind === "registered" && !v.vehicleId) ctx.addIssue({ code: "custom", path: ["vehicleId"], message: "Select a vehicle" });
     if (kind !== "registered") {

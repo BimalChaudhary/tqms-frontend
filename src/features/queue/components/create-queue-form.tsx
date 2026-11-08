@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { apiFetch } from "@/shared/api/client";
 import type { Single } from "@/shared/api/types";
-import { ComboField, SelectField, TextField, TextareaField } from "@/shared/forms/fields";
+import { ComboField, PhoneField, SelectField, TextField, TextareaField } from "@/shared/forms/fields";
 import { applyServerErrors } from "@/shared/forms/server-errors";
 import { formatBsDate, today } from "@/shared/lib/format";
 import { useSession } from "@/features/auth/hooks";
@@ -18,7 +18,7 @@ import type { VehicleKind } from "../types";
 import { ReceiptPreview } from "./receipt-preview";
 
 const EMPTY: CreateQueueValues = {
-  vehicleId: "", vehicleNumber: "", vehicleTypeId: "", from: "", to: "", grossWeight: "", transportCompany: "", loadDetails: "", narration: "",
+  vehicleId: "", vehicleNumber: "", vehicleTypeId: "", from: "", to: "", grossWeight: "", transportCompany: "", loadDetails: "", narration: "", driverPhone: "",
 };
 
 export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
@@ -41,6 +41,7 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
       await create.mutateAsync({
         kind, from: values.from, to: values.to, grossWeight: Number(values.grossWeight), loadDetails: values.loadDetails,
         transportCompany: values.transportCompany || undefined, narration: values.narration || undefined,
+        driverPhone: values.driverPhone || undefined,
         ...(kind === "registered" ? { vehicleId: values.vehicleId } : { vehicleNumber: values.vehicleNumber, vehicleTypeId: values.vehicleTypeId }),
       });
     } catch (e) { applyServerErrors(e, methods.setError); }
@@ -68,6 +69,7 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
             <TextField name="transportCompany" label="Transport company" placeholder="Optional" />
             <TextField name="loadDetails" label="Load details" required placeholder="e.g. Cement, 20 tons" />
             <TextareaField name="narration" label="Narration" className="sm:col-span-2" />
+            <PhoneField name="driverPhone" label="Driver’s phone" />
           </div>
           {create.isError && !create.error.fieldErrors && <p role="alert" className="mt-4 text-sm text-bad">{create.error.message}</p>}
           <div className="mt-6 flex justify-end gap-2">
@@ -79,7 +81,7 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
           <ReceiptPreview draft data={{
             sangh: session?.sthaniyaSangh, checkpoint: session?.name, date: formatBsDate(today()), time: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
             vehicleNumber: kind === "registered" ? vehicleLabel : v.vehicleNumber, load: v.loadDetails, narration: v.narration,
-            weight: v.grossWeight ? Number(v.grossWeight) : null,
+            weight: v.grossWeight ? Number(v.grossWeight) : null, driverPhone: v.driverPhone,
           }} />
         </div>
       </form>

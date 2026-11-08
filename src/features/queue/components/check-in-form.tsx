@@ -59,7 +59,7 @@ export function CheckInForm({ id }: { id: string }) {
             </Section>
           </div>
           <div className="lg:sticky lg:top-20">
-            <ReceiptPreview draft data={{ sangh: session?.sthaniyaSangh, checkpoint: session?.name, date: today(), vehicleNumber: q.vehicleNumber, load: q.loadDetails, weight: weight ? Number(weight) : null }} />
+            <ReceiptPreview draft data={{ sangh: session?.sthaniyaSangh, checkpoint: session?.name, date: today(), vehicleNumber: q.vehicleNumber, load: q.loadDetails, driverPhone: q.driverPhone, weight: weight ? Number(weight) : null }} />
           </div>
         </form>
       </FormProvider>
