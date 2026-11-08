@@ -63,7 +63,7 @@ export function DynamicForm({ fields, initial, submitLabel = "Save", onSubmit, o
   onSubmit: (values: FormValues) => Promise<unknown>; onCancel?: () => void;
 }) {
   const methods = useForm<FormValues>({ resolver: zodResolver(buildSchema(fields)) as Resolver<FormValues>, defaultValues: defaultsFor(fields, initial) });
-  const { handleSubmit, setError, formState: { isSubmitting } } = methods;
+  const { handleSubmit, setError, watch, formState: { isSubmitting } } = methods;
 
   return (
     <FormProvider {...methods}>
@@ -78,7 +78,12 @@ export function DynamicForm({ fields, initial, submitLabel = "Save", onSubmit, o
               case "file": return <FileField key={f.name} {...common} accept={f.accept} existingName={f.existingName} />;
               case "textarea": return <TextareaField key={f.name} {...common} placeholder={f.placeholder} />;
               case "checkbox": return <SwitchField key={f.name} {...common} />;
-              case "date": return <NepaliDateField key={f.name} {...common} />;
+              case "date": {
+                const laterField = fields.find((candidate) => candidate.after === f.name);
+                const minDate = f.after ? watch(f.after) : undefined;
+                const maxDate = laterField ? watch(laterField.name) : undefined;
+                return <NepaliDateField key={f.name} {...common} minDate={typeof minDate === "string" ? minDate : undefined} maxDate={typeof maxDate === "string" ? maxDate : undefined} />;
+              }
               default: return <TextField key={f.name} {...common} type={f.type === "number" ? "number" : "text"} placeholder={f.placeholder} />;
             }
           })}

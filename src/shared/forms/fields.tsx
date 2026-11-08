@@ -35,7 +35,7 @@ export function TextField({ name, label, required, hint, className, disabled, ty
 }
 
 /** Bikram Sambat date input; form state stays ISO Gregorian for API compatibility. */
-export function NepaliDateField({ name, label, required, hint, className, disabled }: Base) {
+export function NepaliDateField({ name, label, required, hint, className, disabled, minDate, maxDate }: Base & { minDate?: string; maxDate?: string }) {
   const { control } = useFormContext<FieldValues>();
   const { field } = useController({ name, control });
   const error = useErr(name);
@@ -112,14 +112,15 @@ export function NepaliDateField({ name, label, required, hint, className, disabl
             const day = i + 1;
             const dateIso = toIso(view.year, view.month, day);
             const selected = dateIso && dateIso === iso;
-            return <button key={day} type="button" disabled={!dateIso} aria-pressed={!!selected}
+            const outOfRange = !!dateIso && ((minDate && dateIso < minDate) || (maxDate && dateIso > maxDate));
+            return <button key={day} type="button" disabled={!dateIso || !!outOfRange} aria-pressed={!!selected}
               onClick={() => { if (dateIso) { field.onChange(dateIso); setOpen(false); } }}
-              className={`rounded py-1.5 hover:bg-brand-100 disabled:opacity-30 ${selected ? "bg-brand-700 text-white hover:bg-brand-700" : ""}`}>{day}</button>;
+              className={`rounded py-1.5 hover:bg-brand-100 disabled:cursor-not-allowed disabled:opacity-30 ${selected ? "bg-brand-700 text-white hover:bg-brand-700" : ""}`}>{day}</button>;
           })}
         </div>
         <div className="mt-2 flex justify-between border-t border-line pt-2 text-xs">
           <button type="button" className="text-brand-700 hover:underline" onClick={() => { field.onChange(""); setOpen(false); }}>मेट्नुहोस्</button>
-          <button type="button" className="text-brand-700 hover:underline" onClick={() => { const now = new NepaliDate(); const current = now.getBS(); const dateIso = toIso(current.year, current.month, current.date); if (dateIso) field.onChange(dateIso); setView({ year: current.year, month: current.month }); setOpen(false); }}>आज</button>
+          <button type="button" className="text-brand-700 hover:underline" onClick={() => { const now = new NepaliDate(); const current = now.getBS(); const dateIso = toIso(current.year, current.month, current.date); if (dateIso && (!minDate || dateIso >= minDate) && (!maxDate || dateIso <= maxDate)) { field.onChange(dateIso); setView({ year: current.year, month: current.month }); setOpen(false); } }}>आज</button>
         </div>
       </div>}
     </div>}
