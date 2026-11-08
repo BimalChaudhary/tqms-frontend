@@ -132,6 +132,7 @@ export function FileField({ name, label, required, hint, className, disabled, ac
   const { field } = useController({ name, control });
   const error = useErr(name);
   const file = field.value instanceof File ? field.value : undefined;
+  const currentUrl = existingName?.startsWith("https://") ? existingName : undefined;
   const [previewUrl, setPreviewUrl] = useState<string>();
   useEffect(() => {
     if (!file?.type.startsWith("image/")) { setPreviewUrl(undefined); return; }
@@ -140,13 +141,14 @@ export function FileField({ name, label, required, hint, className, disabled, ac
     return () => URL.revokeObjectURL(url);
   }, [file]);
   return (
-    <FieldShell label={label} required={required} error={error} hint={hint ?? (existingName && !file ? `Current file: ${existingName}` : "PNG, JPG, WebP or PDF, up to 5 MB")} className={className}>
+    <FieldShell label={label} required={required} error={error} hint={hint ?? (existingName && !file && !currentUrl ? `Current file: ${existingName}` : "PNG, JPG, WebP or PDF, up to 5 MB")} className={className}>
       {(p) => (
         <div className="flex items-center gap-3">
           <input {...p} type="file" accept={accept} disabled={disabled} name={field.name} ref={field.ref} onBlur={field.onBlur}
             onChange={(e) => field.onChange(e.target.files?.[0])}
             className={cn("control min-w-0 flex-1 !p-0 file:mr-3 file:cursor-pointer file:border-0 file:border-r file:border-line file:bg-stone-50 file:px-3 file:py-2 file:text-sm hover:file:bg-stone-100")} />
           {previewUrl && <img src={previewUrl} alt={`${label} preview`} className="size-14 shrink-0 rounded-md border border-line object-cover" />}
+          {currentUrl && !file && <a href={currentUrl} target="_blank" rel="noreferrer" className="shrink-0 text-sm text-brand-700 underline">View current file</a>}
         </div>
       )}
     </FieldShell>
