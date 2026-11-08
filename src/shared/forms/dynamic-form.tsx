@@ -16,6 +16,7 @@ import { applyServerErrors } from "./server-errors";
 export interface FieldDef {
   name: string; label: string; type: "text" | "number" | "date" | "select" | "combo" | "file" | "textarea" | "checkbox";
   required?: boolean; lookup?: LookupType; options?: Option[]; placeholder?: string; hint?: string; fullWidth?: boolean;
+  initialLabel?: string;
   /** For dates: must be on/after this other field (e.g. expiry after start). */
   after?: string; pattern?: RegExp; patternMessage?: string; min?: number; existingName?: string; accept?: string;
 }
@@ -74,7 +75,7 @@ export function DynamicForm({ fields, initial, submitLabel = "Save", onSubmit, o
             const common = { name: f.name, label: f.label, required: f.required, hint: f.hint, className: f.fullWidth ? "sm:col-span-2" : undefined };
             switch (f.type) {
               case "select": return <SelectField key={f.name} {...common} lookup={f.lookup} options={f.options} placeholder={f.placeholder} />;
-              case "combo": return <ComboField key={f.name} {...common} lookup={f.lookup!} placeholder={f.placeholder} />;
+              case "combo": return <ComboField key={f.name} {...common} lookup={f.lookup!} placeholder={f.placeholder} initialLabel={f.initialLabel} />;
               case "file": return <FileField key={f.name} {...common} accept={f.accept} existingName={f.existingName} />;
               case "textarea": return <TextareaField key={f.name} {...common} placeholder={f.placeholder} />;
               case "checkbox": return <SwitchField key={f.name} {...common} />;

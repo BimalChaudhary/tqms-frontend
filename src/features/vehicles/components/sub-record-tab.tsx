@@ -31,7 +31,11 @@ export function SubRecordTab({ vehicleId, config }: { vehicleId: string; config:
   const existingFiles = (r: SubRecord) =>
     Object.fromEntries(config.fields.filter((f) => f.type === "file").map((f) => [f.name, r[`${f.name}Name`]]));
   const fields = editing && editing !== "new"
-    ? config.fields.map((f) => (f.type === "file" ? { ...f, required: false, existingName: String(existingFiles(editing)[f.name] ?? "") || undefined } : f))
+    ? config.fields.map((f) => {
+      if (f.type === "file") return { ...f, required: false, existingName: String(existingFiles(editing)[f.name] ?? "") || undefined };
+      if (f.type === "combo") return { ...f, initialLabel: String(editing[`${f.name}Label`] ?? "") };
+      return f;
+    })
     : config.fields;
   const initial: FormValues | undefined = editing && editing !== "new" ? { ...editing } : undefined;
 
