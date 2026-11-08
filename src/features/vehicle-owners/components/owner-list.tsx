@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui/button";
 import { StatusBadge } from "@/shared/ui/badge";
 import { DataTable, type Column } from "@/shared/ui/data-table";
 import { SearchInput } from "@/shared/ui/search-input";
+import { useSession } from "@/features/auth/hooks";
 import { useOwners } from "../hooks";
 import type { OwnerSummary } from "../types";
 
@@ -15,6 +16,7 @@ const iconLink = "inline-flex size-8 items-center justify-center rounded-md text
 export function OwnerList() {
   const list = useListState(INIT);
   const { data, isLoading, isFetching, error, refetch } = useOwners(list.params);
+  const { data: session } = useSession();
   const columns: Column<OwnerSummary>[] = [
     { key: "sn", header: "S.N", cell: (_, n) => n, className: "w-14 text-muted" },
     { key: "name", header: "Name / company", sortable: true, cell: (o) => (<><span className="font-medium">{o.name}</span><span className="block text-xs text-muted">{o.email ?? "No email"}</span></>) },
@@ -45,10 +47,40 @@ export function OwnerList() {
           <Link href="/vehicle-owners/new"><Button><Plus className="size-4" /> Add owner</Button></Link>
         </div>
       </div>
-      <DataTable caption="Vehicle owners" columns={columns} rows={data?.data} rowKey={(o) => o.id} loading={isLoading} refreshing={isFetching && !isLoading}
-        error={error} onRetry={() => refetch()} meta={data?.meta} onPage={list.setPage} onPageSize={list.setPageSize}
-        sort={{ key: list.state.sort, order: list.state.order }} onSort={list.toggleSort}
-        empty={{ title: "No owners match", hint: "Try another name, number or verification filter.", action: <Button variant="secondary" size="sm" onClick={list.reset}>Clear filters</Button> }} />
+      <div className="owner-screen-list">
+        <DataTable caption="Vehicle owners" columns={columns} rows={data?.data} rowKey={(o) => o.id} loading={isLoading} refreshing={isFetching && !isLoading}
+          error={error} onRetry={() => refetch()} meta={data?.meta} onPage={list.setPage} onPageSize={list.setPageSize}
+          sort={{ key: list.state.sort, order: list.state.order }} onSort={list.toggleSort}
+          empty={{ title: "No owners match", hint: "Try another name, number or verification filter.", action: <Button variant="secondary" size="sm" onClick={list.reset}>Clear filters</Button> }} />
+      </div>
+      <section className="owner-print-report" aria-label="Vehicle owner print report">
+        <table>
+          <thead>
+            <tr>
+              <th>Mahasangh Name</th>
+              <th>SthaniyaSangh Name</th>
+              <th>VehicleOwner Name</th>
+              <th>Address</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+              <th>VehicleOwner Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.data.map((owner) => (
+              <tr key={owner.id}>
+                <td>नेपाल ट्रक यातायात व्यवसायी महासंघ</td>
+                <td>{session?.sthaniyaSangh ?? "N/A"}</td>
+                <td>{owner.name || "N/A"}</td>
+                <td>{owner.address || "N/A"}</td>
+                <td>{owner.email || "N/A"}</td>
+                <td>{owner.phone || "N/A"}</td>
+                <td>{owner.isVerified ? "Verified" : "Unverified"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </>
   );
 }
