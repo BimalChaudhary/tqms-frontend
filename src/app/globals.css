@@ -53,15 +53,8 @@ dialog[open] { animation: dlg 140ms ease-out; }
 }
 @media (prefers-reduced-motion: reduce) { .skeleton::after { animation: none; } }
 
-.owner-print-report { display: none; }
-
 @media print {
   .no-print { display: none !important; }
-  .owner-screen-list { display: none !important; }
-  .owner-print-report { display: block !important; }
-  .owner-print-report table { width: 100%; border-collapse: collapse; table-layout: fixed; font: 9pt Arial, sans-serif; }
-  .owner-print-report th, .owner-print-report td { border: 1px solid #444; padding: 4px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
-  .owner-print-report th { font-weight: 700; }
   .overflow-x-auto { overflow: visible !important; }
   .overflow-x-auto::-webkit-scrollbar { display: none !important; }
   body { background: white; }
