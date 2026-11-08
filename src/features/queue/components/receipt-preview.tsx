@@ -4,7 +4,9 @@ import type { Receipt } from "../types";
 /** Mirrors the paper receipt (bilingual header) so staff see exactly what will be printed. */
 export type ReceiptView = Partial<Receipt> & { vehicleNumber?: string };
 
-export function ReceiptPreview({ data, draft }: { data: ReceiptView; draft?: boolean }) {
+export function ReceiptPreview({ data, draft, cutFee = 50, onCutFeeChange }: {
+  data: ReceiptView; draft?: boolean; cutFee?: number; onCutFeeChange?: (amount: number) => void;
+}) {
   const row = (k: string, v: React.ReactNode) => (
     <div className="flex justify-between gap-3 py-1"><dt className="text-muted">{k}</dt><dd className="text-right font-medium">{v}</dd></div>
   );
@@ -27,13 +29,24 @@ export function ReceiptPreview({ data, draft }: { data: ReceiptView; draft?: boo
         {row("Weight", formatKg(data.weight))}
       </dl>
       <table className="w-full border-t border-line">
-        <thead><tr className="text-left text-muted"><th className="py-1.5 font-medium">Description</th><th className="py-1.5 text-right font-medium">Amount</th></tr></thead>
+        <thead><tr className="text-left text-muted"><th className="py-1.5 font-medium">विवरण</th><th className="py-1.5 text-right font-medium">रकम (रु.)</th></tr></thead>
         <tbody>
           {data.charges?.length ? data.charges.map((c) => (
             <tr key={c.label}><td className="py-1">{c.label}</td><td className="py-1 text-right">{formatMoney(c.amount)}</td></tr>
-          )) : <tr><td colSpan={2} className="py-1 text-muted">Charges are calculated on save</td></tr>}
+          )) : draft ? <>
+            <tr>
+              <td className="border-t border-line py-2">काटा शुल्क</td>
+              <td className="border-t border-line py-2 text-right">
+                <select aria-label="काटा शुल्क रकम" className="control ml-auto w-28 py-1" value={cutFee} disabled={!onCutFeeChange}
+                  onChange={(event) => onCutFeeChange?.(Number(event.target.value))}>
+                  {[0, 50, 100].map((amount) => <option key={amount} value={amount}>{amount}</option>)}
+                </select>
+              </td>
+            </tr>
+            <tr className="font-semibold"><td className="py-2">जम्मा शुल्क</td><td className="py-2 text-right">{formatMoney(cutFee)}</td></tr>
+          </> : <tr><td colSpan={2} className="py-1 text-muted">शुल्क उपलब्ध छैन</td></tr>}
         </tbody>
-        {data.total !== undefined && <tfoot><tr className="border-t border-line font-semibold"><td className="py-1.5">Total</td><td className="py-1.5 text-right">{formatMoney(data.total)}</td></tr></tfoot>}
+        {data.total !== undefined && <tfoot><tr className="border-t border-line font-semibold"><td className="py-1.5">जम्मा शुल्क</td><td className="py-1.5 text-right">{formatMoney(data.total)}</td></tr></tfoot>}
       </table>
     </article>
   );

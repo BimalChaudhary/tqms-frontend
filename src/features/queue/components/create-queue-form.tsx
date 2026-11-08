@@ -26,6 +26,7 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
   const create = useCreateQueue();
   const { data: session } = useSession();
   const [vehicleLabel, setVehicleLabel] = useState("");
+  const [cutFee, setCutFee] = useState(50);
   const schema = useMemo(() => createQueueSchema(kind), [kind]);
   const methods = useForm<CreateQueueValues>({ resolver: zodResolver(schema), defaultValues: EMPTY });
   const v = useWatch({ control: methods.control });
@@ -42,6 +43,7 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
         kind, from: values.from, to: values.to, grossWeight: Number(values.grossWeight), loadDetails: values.loadDetails,
         transportCompany: values.transportCompany || undefined, narration: values.narration || undefined,
         driverPhone: values.driverPhone || undefined,
+        cutFee,
         ...(kind === "registered" ? { vehicleId: values.vehicleId } : { vehicleNumber: values.vehicleNumber, vehicleTypeId: values.vehicleTypeId }),
       });
     } catch (e) { applyServerErrors(e, methods.setError); }
@@ -78,7 +80,7 @@ export function CreateQueueForm({ kind }: { kind: VehicleKind }) {
           </div>
         </Section>
         <div className="lg:sticky lg:top-20">
-          <ReceiptPreview draft data={{
+          <ReceiptPreview draft cutFee={cutFee} onCutFeeChange={setCutFee} data={{
             sangh: session?.sthaniyaSangh, checkpoint: session?.name, date: formatBsDate(today()), time: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
             vehicleNumber: kind === "registered" ? vehicleLabel : v.vehicleNumber, load: v.loadDetails, narration: v.narration,
             weight: v.grossWeight ? Number(v.grossWeight) : null, driverPhone: v.driverPhone,

@@ -19,12 +19,12 @@ export interface QueueDetail {
   id: string; queueNumber: string; vehicleNumber: string; status: QueueStatus; cardNumber: string | null; cardType: string | null;
   vehicleType: string; owner: string | null; isRegistered: boolean; sangh: string | null; lastCheckpoint: string | null;
   route: string | null; transportCompany: string | null; loadDetails: string | null; checkpointWeight: number | null;
-  entryDate: string; entries: QueueEntry[]; driverPhone?: string | null;
+  entryDate: string; entries: QueueEntry[]; driverPhone?: string | null; cutFee?: number;
 }
 
 export interface CreateQueueInput {
   kind: VehicleKind; vehicleId?: string; vehicleNumber?: string; vehicleTypeId?: string; from: string; to: string;
-  grossWeight: number; transportCompany?: string; loadDetails: string; narration?: string; driverPhone?: string;
+  grossWeight: number; transportCompany?: string; loadDetails: string; narration?: string; driverPhone?: string; cutFee?: number;
 }
 export interface CheckInInput { grossWeight: number }
 export interface ApprovePendingInput {
