@@ -6,7 +6,7 @@ import type { LookupType } from "@/shared/api/lookup";
 import type { Option } from "@/shared/api/types";
 import { Button } from "@/shared/ui/button";
 import { uploadFile } from "@/shared/forms/validators";
-import { ComboField, FileField, SelectField, SwitchField, TextField, TextareaField } from "./fields";
+import { ComboField, FileField, NepaliDateField, SelectField, SwitchField, TextField, TextareaField } from "./fields";
 import { applyServerErrors } from "./server-errors";
 
 /**
@@ -78,7 +78,8 @@ export function DynamicForm({ fields, initial, submitLabel = "Save", onSubmit, o
               case "file": return <FileField key={f.name} {...common} accept={f.accept} existingName={f.existingName} />;
               case "textarea": return <TextareaField key={f.name} {...common} placeholder={f.placeholder} />;
               case "checkbox": return <SwitchField key={f.name} {...common} />;
-              default: return <TextField key={f.name} {...common} type={f.type === "date" ? "date" : f.type === "number" ? "number" : "text"} placeholder={f.placeholder} />;
+              case "date": return <NepaliDateField key={f.name} {...common} />;
+              default: return <TextField key={f.name} {...common} type={f.type === "number" ? "number" : "text"} placeholder={f.placeholder} />;
             }
           })}
         </div>

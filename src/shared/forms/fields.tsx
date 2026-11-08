@@ -8,6 +8,7 @@ import { cn } from "@/shared/lib/cn";
 import { Combobox } from "./combobox";
 import { FieldShell } from "./field-shell";
 import { selectStyles } from "./select-styles";
+import NepaliDate from "nepali-date-converter";
 
 /**
  * Field components bind to the surrounding <FormProvider>; they render label, control and error.
@@ -31,6 +32,40 @@ export function TextField({ name, label, required, hint, className, disabled, ty
       {(p) => <input {...p} {...registration} type={type} disabled={disabled} placeholder={placeholder} inputMode={inputMode} maxLength={maxLength} onChange={digitsOnly ? (event) => registration.onChange({ ...event, target: { ...event.target, value: event.target.value.replace(/\\D/g, "").slice(0, maxLength) } }) : registration.onChange} step={type === "number" ? "any" : undefined} className="control" />}
     </FieldShell>
   );
+}
+
+/** Bikram Sambat date input; form state stays ISO Gregorian for API compatibility. */
+export function NepaliDateField({ name, label, required, hint, className, disabled }: Base) {
+  const { control } = useFormContext<FieldValues>();
+  const { field } = useController({ name, control });
+  const error = useErr(name);
+  const iso = typeof field.value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(field.value) ? field.value : "";
+  let bs = "";
+  if (iso) {
+    try {
+      const [y, m, d] = iso.split("-").map(Number);
+      const converted = new NepaliDate(new Date(Date.UTC(y, m - 1, d, 6))).getBS();
+      bs = `${converted.year}-${String(converted.month + 1).padStart(2, "0")}-${String(converted.date).padStart(2, "0")}`;
+    } catch { /* An unsupported Gregorian date remains editable for correction. */ }
+  }
+  return <FieldShell label={label} required={required} error={error} hint={hint ?? "Bikram Sambat (YYYY-MM-DD)"} className={className}>
+    {(p) => <input {...p} ref={field.ref} name={field.name} value={iso ? bs : String(field.value ?? "")} disabled={disabled}
+      placeholder="2083-01-01" inputMode="numeric" autoComplete="off" onBlur={field.onBlur}
+      onChange={(e) => {
+        const raw = e.target.value.trim();
+        if (!raw) { field.onChange(""); return; }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) { field.onChange(raw); return; }
+        try {
+          const [y, m, d] = raw.split("-").map(Number);
+          const converted = new NepaliDate(y, m - 1, d);
+          const roundTrip = converted.getBS();
+          if (roundTrip.year !== y || roundTrip.month !== m - 1 || roundTrip.date !== d) { field.onChange(raw); return; }
+          const date = converted.toJsDate();
+          const ad = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+          field.onChange(ad);
+        } catch { field.onChange(raw); }
+      }} className="control" />}
+  </FieldShell>;
 }
 
 export function PhoneField({ name, label, required, hint, className, disabled, placeholder = "98XXXXXXXX" }: Base & { placeholder?: string }) {

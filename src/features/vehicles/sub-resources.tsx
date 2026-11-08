@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { FieldDef } from "@/shared/forms/dynamic-form";
-import { formatDate, orDash } from "@/shared/lib/format";
+import { formatBsDate, orDash } from "@/shared/lib/format";
 import type { SubRecord } from "./types";
 
 /**
@@ -14,7 +14,7 @@ export interface SubResource {
 }
 
 const text = (k: string) => (r: SubRecord) => orDash(r[k] as string);
-const date = (k: string) => (r: SubRecord) => formatDate(r[k] as string);
+const date = (k: string) => (r: SubRecord) => formatBsDate(r[k] as string);
 const file = (k: string) => (r: SubRecord) => r[`${k}Url`]
   ? <a href={String(r[`${k}Url`])} target="_blank" rel="noreferrer" className="text-brand-700 underline-offset-2 hover:underline">{orDash(r[`${k}Name`] as string) === "—" ? "View file" : String(r[`${k}Name`])}</a>
   : "—";
